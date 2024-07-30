@@ -36,31 +36,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    var Sitems by remember { mutableStateOf(listOf<ShoppingItem>()) }
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center
-
-                    ) {
-                        Button(
-                            onClick = { /*TODO*/ },
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        ) {
-                            Text(text = "Add item")
-
-                        }
-                        LazyColumn (
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp)
-
-                        ){
-                            items(Sitems){
-
-                            }
-
-                        }
-                    }
+                    ShoppingListApp()
                 }
             }
         }
@@ -69,9 +45,3 @@ class MainActivity : ComponentActivity() {
 
 }
 
-data class ShoppingItem(
-    var id: Int,
-    val name: String,
-    val quantity: Int,
-    val isEditable:Boolean
-)
