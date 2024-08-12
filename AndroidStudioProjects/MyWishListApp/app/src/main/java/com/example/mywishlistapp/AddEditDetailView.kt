@@ -14,21 +14,24 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.KeyboardType.Companion.Text
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.mywishlistapp.ui.theme.WishViewModel
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -37,12 +40,29 @@ fun AddEditDetailView(
     viewModel: WishViewModel,
     navController: NavController
 ){
+    val snackMessage =  remember {
+        mutableStateOf("")
+    }
+    val scope = rememberCoroutineScope()
+
+    val scaffoldState = rememberScaffoldState()
+
+    if(id!=0L){
+        val wish=viewModel.getWishId(id).collectAsState(initial = Wish(0L, "", ""))
+        viewModel.wishTitleState=wish.value.title
+        viewModel.wishDescriptionState=wish.value.description
+    }
+    else{
+        viewModel.wishTitleState=""
+        viewModel.wishTitleState=""
+    }
     Scaffold (
+        scaffoldState=scaffoldState,
         topBar = {
             AppBarView(
                 title = if(id!=0L) stringResource(id = R.string.update_wish) else stringResource(id = R.string.add_wish),
         ) {navController.navigateUp()//common pattern in Jetpack Compose to pass a lambda as the last parameter of a function
-     }}
+     } }
     ){
         Column (
             modifier = Modifier
@@ -69,9 +89,30 @@ fun AddEditDetailView(
             Spacer(modifier = Modifier.height(10.dp))
             Button(onClick = {
                 if(viewModel.wishTitleState.isNotEmpty() && viewModel.wishDescriptionState.isNotEmpty()){
-                    // update wish
+                    if(id!=0L){
+                        viewModel.updateWish(
+                            Wish(
+                                id = id,
+                                title = viewModel.wishTitleState.trim(),
+                                description = viewModel.wishDescriptionState.trim()
+                            )
+                        )
+                    }else{
+                        viewModel.addWish(
+                            Wish(
+                                title = viewModel.wishTitleState.trim(),
+                                description = viewModel.wishDescriptionState.trim()
+                            )
+                        )
+                        snackMessage.value="Wish added successfully"
+                        navController.navigateUp()
+                    }
                 }else{
-
+                    snackMessage.value="enter fields to create a wish"
+                }
+                scope.launch {
+                  //  scaffoldState.snackbarHostState.showSnackbar(snackMessage.value)
+                    navController.navigateUp()
                 }
             }) {
                 Text(
